@@ -2,356 +2,264 @@
 name: spec
 description: >-
   Spec-driven development in the active repository's spec/{feature}/ directory.
-  Use when the user says /spec, "write a spec", "plan a feature", "create a PRD",
-  "spec status", or references a spec/ directory. Determines intent from context —
-  no subcommands. Spec turns write only under spec/{feature}/ unless the user
-  explicitly approves implementation.
+  Use when user says /spec,
+  "write a spec", "plan a feature", "create a PRD", "spec status", or
+  references spec/ directory. Determines intent from context — no subcommands.
 license: MIT
-metadata:
-  audience: software engineers
-  tools: filesystem,git
+user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+  - Task
 ---
 
 # Spec-Driven Development
 
-Manage feature specs in `spec/{feature-name}/`. Each feature gets its own directory
-with lean, focused documents.
+Manage feature specs in `spec/{feature-name}/`. Each feature gets its own directory with lean, focused documents.
 
-Resolve the active repository from the current working directory, then use its
-repo-root `spec/` path. Prefer kebab-case feature names. Prefix with a component
-or area when that improves discoverability (e.g. `api-rate-limits`,
-`checkout-retry`). Use `shared-*` or `platform-*` only for genuinely cross-cutting
-work.
+Resolve the active repository from the current working directory, then use its repo-root `spec/` path in commands and links. It may be a normal directory or a symlink; inspect the resolved path before editing.
 
-Keep active specs under `spec/`. If the repository has `spec-archive/`, read
-archived material for context but ask before reactivating it. Follow any
-repository-local agent instructions (`AGENTS.md`, `CLAUDE.md`, etc.) for naming,
-archive policy, and production boundaries.
+Use a specific kebab-case feature name. Prefix it with the affected component or product when that improves discoverability; use `shared-*` or `platform-*` for genuinely cross-cutting work.
 
-## Spec-only boundary
+Keep active specs under `spec/`. If the repository has `spec-archive/`, read archived material for context but ask before reactivating it. Follow any repository-local `AGENTS.md` instructions for locations, naming, archive policy, and production boundaries.
 
-When the user invokes this skill with `/spec`, `$spec`, "write a spec",
-"create a spec", "spec this out", "plan this", or similar wording, they are asking
-for **specification work only**.
+## How It Works
 
-During a spec turn:
-
-- Do **not** implement application code.
-- Do **not** edit source/config outside `spec/{feature-name}/`.
-- Do **not** create migrations outside `spec/{feature-name}/sql-runbook.md`
-  (draft SQL lives in the runbook until implementation is approved).
-- Do **not** run formatters or refactors that modify application source.
-- Do **not** "just make the obvious fix" after research confirms the approach.
-
-Allowed work:
-
-- Reading/searching code and docs for context.
-- Running **read-only** investigation when the user asks or the spec needs facts.
-- Writing/updating artifacts under `spec/{feature-name}/`.
-
-Do not write `GOAL.md` during initial speccing unless the user explicitly asks.
-`GOAL.md` is a later handoff artifact after the user has reviewed and accepted the
-spec (especially `mockups.md`).
-
-After the spec, plan, or findings are written, **stop** and ask for explicit
-implementation approval or review. Implementation may only begin later when the
-user clearly says to build, implement, apply, code, or otherwise approve code
-changes.
-
-## How it works
-
-The user mentions a spec naturally — determine intent from context:
+The user mentions a spec naturally — the agent determines intent from context:
 
 - If `spec/{name}/` doesn't exist → create it (new spec)
-- If `spec/{name}/progress.md` exists → read it, continue from where you are
-- If only `spec-archive/{name}/` exists → read for context; ask before reactivating;
-  do not edit archived specs in place
-- Always check first: does the directory exist? What files are in it? Status?
+- If `spec/{name}/progress.md` exists → read it, figure out where we are, continue
+- If only `spec-archive/{name}/` exists → read it for context and ask whether to reactivate it; do not edit archived specs in place
+- Always check first: does the directory exist? What files are in it? What's the status?
 
-## File persistence rule
+## CRITICAL: File Persistence Rule
 
-**Every operation MUST write its output files to disk before completing.**
+**Every operation MUST write its output files to disk before completing.** This is non-negotiable.
 
-- Generating content in the conversation is not enough — save with the Write tool
-  to `spec/{name}/`
-- After writing each file, verify it exists (`ls -la spec/{name}/` or equivalent)
-- Never consider work complete until required output files are on disk
-- If work is interrupted, files on disk are the only thing that survives
+- Generating spec content in the conversation is NOT enough — it MUST be saved with the Write tool to `spec/{name}/`
+- After writing each file, verify it exists: `ls -la spec/{name}/`
+- NEVER consider work complete until all required output files are confirmed on disk
+- If work is interrupted, the files written so far are the only thing that survives — conversation context is lost between sessions
 
-### Required output files
+### Required Output Files
 
 | Activity | MUST write to disk | Also write if applicable |
-|----------|-------------------|--------------------------|
-| New spec | `SPEC.md`, `mockups.md`, `progress.md` | `findings.md` (large specs) |
-| New spec (SQL / schema changes) | `sql-runbook.md` | — |
-| Planning | `plan.md`, update `progress.md` | Update `mockups.md` if design changes |
-| Goal handoff (only when asked) | `GOAL.md`, update `progress.md` | — |
-| Implementing | Update `progress.md` after each step | Keep `mockups.md` current |
-| Resuming | Update `progress.md` with recovery entry | — |
+|----------|-------------------|------------------------|
+| New spec | `spec/{name}/SPEC.md`, `spec/{name}/mockups.md`, `spec/{name}/progress.md` | `spec/{name}/findings.md` (large specs) |
+| Planning | `spec/{name}/plan.md`, update `spec/{name}/progress.md` | |
+| Implementing | Update `spec/{name}/progress.md` after each step | |
+| Resuming | Update `spec/{name}/progress.md` with recovery entry | |
 
-**Write early, write often.** Don't accumulate content in conversation and write
-only at the end.
+**Write early, write often.** If you draft a spec section, write it immediately. Don't accumulate content in conversation and write at the end — if the session ends early, everything unsaved is lost.
 
-## Diagram rule
+## CRITICAL: Diagram Rule
 
 Every spec MUST include `spec/{name}/mockups.md`.
 
-- Always include system / workflow / sequence / state views that explain the
-  feature end to end — even for backend-only work.
-- If there is user-facing UI, also include wireframes or interaction flows.
-- ASCII, Mermaid, markdown tables, or annotated wireframes are all fine; they must
-  be concrete enough for the user to validate quickly.
-- A spec is not complete until `mockups.md` exists and matches the current spec.
-- Treat `mockups.md` as a **review gate** — expect iteration before coding.
+- Always include system diagrams, workflow diagrams, sequence diagrams, state diagrams, or other architecture views that explain how the feature works end to end.
+- If the work has any user-facing UI, also include UI diagrams or mockups that show the relevant screens, panels, states, and transitions.
+- These can be lightweight ASCII diagrams, Mermaid, markdown tables, or annotated wireframes, but they must be concrete enough that the user can validate the shape of the solution quickly.
+- A spec is not complete until `mockups.md` exists on disk and matches the current spec.
 
-## ELI10 rule
+## CRITICAL: ELI10 Rule
 
-Every `SPEC.md` MUST include an `## ELI10` section immediately after the title and
-before `## Summary`.
+Every `SPEC.md` MUST include an `## ELI10` section immediately after the title and before
+`## Summary`.
 
-- Plain language, short sentences, no unexplained jargon.
-- What is changing, why it matters, safest next step, what is **not** happening yet.
-- One short paragraph or 3–6 bullets.
-- Update whenever scope, phase boundaries, or next action changes.
+- Write it for a smart 10-year-old: plain language, short sentences, and no unexplained internal
+  jargon.
+- Explain what is changing, why it matters, what the safest next step is, and what is explicitly not
+  happening yet.
+- Keep it short: one small paragraph or 3-6 bullets.
+- Update it whenever scope, phase boundaries, or the next action changes.
 
-## Recovery block
+## CRITICAL: Recovery Block
 
-Every `progress.md` MUST include the **verbatim** recovery block from
-[templates/progress.md](templates/progress.md) at the top. Never omit or paraphrase
-it. Copy it exactly.
+Every `progress.md` MUST include the verbatim recovery block from [templates/progress.md](templates/progress.md) at the top. This is the mechanism that ensures the agent re-reads all spec files after context compaction. Never omit it. Never paraphrase it. Copy it exactly.
 
-## Link each file individually
+## Determining Intent
 
-When telling the user which files you wrote or updated, always list **individual
-file paths**. Never point at the folder only.
+Do NOT require specific subcommand syntax. Parse what the user means from context:
 
-Desktop clients turn relative file paths into clickable previews; folder paths often
-cannot be opened the same way.
-
-```
-Files written:
-- `spec/feature-name/SPEC.md`
-- `spec/feature-name/mockups.md`
-- `spec/feature-name/plan.md`
-- `spec/feature-name/progress.md`
-```
-
-Apply this after every create/update/status summary.
-
-## Determining intent
-
-Do **not** require subcommand syntax. Parse meaning from context:
-
-| User says something like… | What to do |
+| User says something like... | What to do |
 |---|---|
 | "spec out X", "write a spec for X", "create a PRD for X" | Create `spec/{name}/`, write SPEC.md collaboratively |
 | "plan the implementation for X", "plan X" | Read SPEC.md, explore codebase, write plan.md |
 | "let's build X", "implement X", "start building X" | Read all spec files, continue from Next Action |
 | "where are we on X", "spec status", `/spec` | Read progress.md, show status |
-| "write the goal", "GOAL.md", "handoff for implementation" | Write `GOAL.md` only after accepted spec |
-| Any mention of an existing spec name | Read progress.md first |
+| Any mention of an existing spec name | Read progress.md first, figure out what's needed |
 
-When ambiguous, read `progress.md` and decide from the current phase.
+When ambiguous, read `progress.md` and decide based on what phase the spec is in.
 
-## Adaptive sizing
+## Adaptive Sizing
 
-Tell the user what size you picked and why.
+Determine size from the user's description. Tell the user what size you picked and why.
 
 ### Small
-
-**Signals:** "fix", "update", "tweak", "rename", "config change", description under
-~3 sentences, single-file change  
-**Files:** `SPEC.md` + `mockups.md` + `progress.md`  
-**Example:** "Fix the empty-state message on the settings page."
+**Signals:** "fix", "update", "tweak", "rename", "config change", description < 3 sentences, single-file change
+**Files created:** SPEC.md + mockups.md + progress.md
+**Example:** "Fix the 404 page styling" — one file, clear scope, no unknowns.
 
 ### Medium
-
-**Signals:** "add", "create", "implement", "build", roughly 2–5 files, sequenced steps  
-**Files:** above + `plan.md`  
-**Example:** "Add webhook retries with exponential backoff and a dead-letter view."
+**Signals:** "add", "create", "implement", "build", 2-5 files affected, needs sequenced steps
+**Files created:** SPEC.md + mockups.md + plan.md + progress.md
+**Example:** "Add webhook retries with exponential backoff" — multiple files (handler, options, errors, page, tests), known pattern.
 
 ### Large
+**Signals:** "evaluate", "research", "migrate", "redesign", "investigate", 5+ files, unknowns exist
+**Files created:** SPEC.md + mockups.md + plan.md + progress.md + findings.md
+**Example:** "Migrate session storage to a shared cache" — research needed, many files, architectural decisions.
 
-**Signals:** "evaluate", "research", "migrate", "redesign", "investigate", 5+ files,
-unknowns  
-**Files:** above + `findings.md`  
-**Example:** "Migrate session storage from sticky servers to a shared cache."
+**Override:** User can always request a different size. Files can be added later (small can promote to medium).
 
-**Override:** The user can request a different size. Small can promote to medium later.
+## What to Do
 
-## What to do
+### Starting a New Spec
 
-### Starting a new spec
-
-1. **Validate name.** Kebab-case; optional area prefix; ensure `spec/{name}/` is free.
+1. **Validate name.** Convert to kebab-case, apply a useful component prefix when appropriate, and check `spec/{name}/` does not already exist.
 2. **Create directory:** `mkdir -p spec/{name}/`
-3. **Determine size.** Tell the user: "This looks like a **{size}** spec — I'll create {files}."
-4. **Explore the codebase** for context:
-   - Read `AGENTS.md` / `CLAUDE.md` / project docs if present
-   - Glob/Grep for related source, patterns, similar features
-5. **Write `SPEC.md` collaboratively** using [templates/spec.md](templates/spec.md).
-   Include `## ELI10`. Draft sections, ask targeted questions. Do **not** dump a full auto-spec.
-   - **SAVE:** `spec/{name}/SPEC.md`
-6. **Write `mockups.md`** using [templates/mockups.md](templates/mockups.md).
-   System/workflow view always; UI views when relevant. Present for review.
-   - **SAVE:** `spec/{name}/mockups.md`
-7. **Write `progress.md`** with status `speccing`, today's date, session log, and recovery block.
-   - **SAVE:** `spec/{name}/progress.md`
-8. **Write `findings.md`** for large specs (research from step 4).
-   - **SAVE:** `spec/{name}/findings.md`
-9. **Write `sql-runbook.md`** if the work involves schema / SQL migrations (see below).
-10. **Verify:** list `spec/{name}/`
+3. **Determine size** using heuristics above. Tell the user: "This looks like a **{size}** spec — I'll create {files}."
+4. **Explore the codebase** for relevant context:
+   - Read repo `AGENTS.md` and any relevant local `AGENTS.md` files
+   - Read `CLAUDE.md` only if it exists and is not just a pointer to `AGENTS.md`
+   - Read any relevant `.claude-docs/` files if the repo still uses them
+   - Glob/Grep for related source files, existing patterns, similar features
+5. **Write SPEC.md collaboratively.** Use [templates/spec.md](templates/spec.md) as the skeleton. Include the required `## ELI10` section near the top. Draft each section, discuss with the user, ask targeted questions. Do NOT auto-generate and dump.
+   - **SAVE CHECKPOINT:** Write `spec/{name}/SPEC.md` as soon as the spec is agreed upon.
+6. **Write mockups.md** using [templates/mockups.md](templates/mockups.md).
+   - Always include a system/workflow view, even for backend-only work.
+   - If the feature affects UI, include UI wireframes or interaction diagrams too.
+   - **SAVE CHECKPOINT:** Write `spec/{name}/mockups.md` immediately after the first usable diagram set exists.
+7. **Save progress.md** with status `speccing`, today's date, a session log entry, AND the recovery block at the top.
+   - **SAVE CHECKPOINT:** Write `spec/{name}/progress.md` immediately.
+8. **Save findings.md** (large specs only) with any research gathered in step 4.
+   - **SAVE CHECKPOINT:** Write `spec/{name}/findings.md` immediately.
+9. **Verify all files exist:** `ls -la spec/{name}/`
 
-### Creating a plan
+### Creating a Plan
 
-1. Read `SPEC.md` and `progress.md`.
-2. Explore implementation surface (patterns, files to touch, tests).
-3. Write `plan.md` from [templates/plan.md](templates/plan.md). Each step: specific files + verification.
-4. Refresh `mockups.md` if exploration changed system shape or UI.
-5. Update `progress.md` → status `planned`.
-6. Verify files on disk.
-
-### Creating GOAL.md (handoff)
-
-Only when the user explicitly asks for a goal / handoff / execution contract after
-reviewing the spec.
-
-1. Read `SPEC.md`, `mockups.md`, `plan.md`, `findings.md`, `progress.md`.
-2. Do not invent new scope.
-3. Write `GOAL.md` with:
-   - Objective
-   - Scope (in / out)
-   - Source of truth (links to the other spec files)
-   - Ordered execution steps with verification
-   - Acceptance criteria
-   - Risks / blockers
-   - Recovery notes (where to resume after compaction)
-4. Update `progress.md` → status `goal-ready`.
-5. Stop for user review. Do not implement until explicit approval.
-
-### SQL / schema changes
-
-If the work involves schema, procedures, views, or seed/backfill SQL, write
-`spec/{name}/sql-runbook.md` during the **spec** phase.
-
-The runbook holds the **draft** migration plus verification and rollback. During
-**implementation** (after approval only):
-
-1. Create the real migration file in whatever path **this repository** uses
-   (discover from existing migrations; do not invent a foreign project path).
-2. Run against the **development** environment first.
-3. Never touch production unless the user explicitly asks.
-
-#### sql-runbook.md shape
-
-Use this outline (fill in repo-specific paths when implementing):
-
-- Title: `sql-runbook.md — {Spec Name}`
-- **Migration file (create during implementation):** `{repo-migration-path}/{NNN}_{Name}.sql`
-- **Target environments:** dev → staging → prod (adjust to this repo)
-- **Deploy order:** document the repo's actual order
-- **Migration Script** — full SQL with idempotent guards where possible
-- **Step-by-step reference** — same SQL broken into logical steps, each with a verify query and expected result
-- **Rollback** — statements to undo
-- **Summary table** — `# | Change | Object | Action`
-
-Rules:
-
-- Full SQL only (no stubs for procedures).
-- Idempotent where the platform allows.
-- Every step has a verification query with an expected result.
-- Rollback section required.
-- Dev first.
+1. **Read** `spec/{name}/SPEC.md` and `progress.md`.
+2. **Explore the codebase** — Glob/Grep/Read to understand the implementation surface. Look for:
+   - Existing patterns to follow (reference implementations)
+   - Files that need modification
+   - Test patterns for the category
+3. **Write plan.md** using [templates/plan.md](templates/plan.md). Each step must reference specific files and have a verification method.
+   - **SAVE CHECKPOINT:** Write `spec/{name}/plan.md` immediately after drafting.
+4. **Refresh mockups.md** if codebase exploration changed the system shape, workflow sequence, or UI plan.
+   - **SAVE CHECKPOINT:** Edit `spec/{name}/mockups.md` immediately when the diagrams need to change.
+5. **Update progress.md** — Set status to `planned`, add session log entry.
+   - **SAVE CHECKPOINT:** Edit `spec/{name}/progress.md` immediately.
+6. **Verify files saved:** `ls -la spec/{name}/`
 
 ### Implementing
 
-Only after explicit user approval to implement.
+1. **Read all spec files** — SPEC.md, mockups.md, plan.md (if exists), progress.md.
+2. **Present summary:** "Here's where we are: {status}. Last completed: {step}. Next: {action}."
+3. **Work through steps.** If plan.md exists, follow its steps. Otherwise, work from SPEC.md acceptance criteria.
+4. **Keep mockups.md current** when implementation changes architecture, workflow shape, operator flow, or UI behavior.
+5. **Update progress.md after EVERY step** — Mark step complete, update Current Step and Next Action fields, add session log notes.
+   - **SAVE CHECKPOINT:** Edit `spec/{name}/progress.md` after EACH completed step. This is the recovery mechanism.
+6. **When done,** set progress.md status to `done`.
 
-1. Read all spec files (including `GOAL.md` if present).
-2. Summarize: status, last completed step, next action.
-3. Follow `plan.md` steps when present; else work from acceptance criteria.
-4. Keep `mockups.md` current if architecture/workflow/UI changes.
-5. Update `progress.md` after **every** step.
-6. When done, set status to `done`.
+### Checking Status
 
-### Checking status
-
-**General:** Scan active `spec/*/progress.md` (skip `spec-archive/` unless asked):
+**No args / general status:** Scan active `spec/*/progress.md` files. Do not include `spec-archive/*` unless the user asks for archived or historical specs. Show a table:
 
 | Spec | Status | Current Step | Next Action |
 |------|--------|--------------|-------------|
 
-**Specific:** Show that spec's `progress.md` (and link the other files).
+**Specific spec:** Show full progress.md contents for that spec.
 
-## Progress update rules
+## Progress Update Rules
 
-- After each plan step → update Current Step, Next Action, session log
-- Decisions → Decisions table (rationale + date)
-- Blockers → Blockers list
-- Errors → Errors table
-- Architecture / workflow / UI change → update `mockups.md`
-- Before ending a session → latest session log entry has a **"Next:"** line
+These apply during planning and implementation:
 
-The **"Next:"** line is the most important field for cross-session recovery.
+- After completing each plan step → update progress.md (Current Step, Next Action, session log)
+- When making a decision → add to Decisions table with rationale and date
+- When hitting a blocker → add to Blockers list
+- When encountering an error → add to Errors table with diagnosis
+- When architecture, workflow, or UI shape changes → update `mockups.md`
+- Before ending session → ensure latest session log entry has a **"Next:"** line
 
-## Behavioral rules
+The "Next:" line is the most important field for cross-conversation recovery.
 
-### Core philosophy
+---
 
-**Context window = RAM (volatile). Filesystem = disk (persistent).**
+## Behavioral Rules
 
-Anything important gets written to disk.
+### Core Philosophy
 
-### 2-Action rule
+**Context Window = RAM (volatile). Filesystem = Disk (persistent).**
 
-After every 2 search/browse/explore operations, save findings to `findings.md`.
+Anything important gets written to disk. The conversation will be compacted or lost. The files survive.
 
-### Read before decide
+### The 2-Action Rule
 
-Re-read `plan.md` + `progress.md` before major decisions. Don't rely on memory alone.
+After every 2 search/browse/explore operations, save findings to `findings.md`. Don't accumulate research only in conversation — write it down before it gets compacted away.
 
-### 3-Strike error protocol
+### Read Before Decide
+
+Re-read `plan.md` + `progress.md` before making major decisions. Don't rely on what you remember from earlier in the conversation — re-read the source of truth.
+
+### 3-Strike Error Protocol
+
+When something fails:
 
 | Attempt | Action |
 |---------|--------|
-| 1 | Diagnose and fix |
-| 2 | Alternative approach (never repeat the same failing action) |
-| 3 | Broader rethink |
-| After 3 | Escalate to user; log attempts in `progress.md` Errors |
+| 1 | Diagnose the error and fix it |
+| 2 | Try an alternative approach (NEVER repeat the same failing action) |
+| 3 | Broader rethink — step back and reconsider the approach |
+| After 3 | Escalate to user. Log all attempts in progress.md Errors table. |
 
-### 6-Question reboot test
+### 6-Question Reboot Test
+
+If you're ever unsure where you are, answer these six questions. If you can't answer any of them, read the indicated file:
 
 | Question | Source |
 |---|---|
 | Where am I? | Current Step in `progress.md` |
 | Where am I going? | Remaining steps in `plan.md` |
-| What's the goal? | Summary / ELI10 in `SPEC.md` |
+| What's the goal? | Summary in `SPEC.md` |
 | What does it look like? | `mockups.md` |
 | What have I learned? | `findings.md` |
 | What have I done? | Session Log in `progress.md` |
 
-### Context compaction recovery
+### Error Logging
 
-After `/clear` or compaction:
+Track errors in the Errors table in `progress.md`:
 
-1. Read `progress.md` (header + recovery block)
-2. Read `SPEC.md`, `mockups.md`, `plan.md` / `findings.md` / `GOAL.md` as present
-3. `git diff --stat` and `git log --oneline -5` when in a git repo
-4. Run the 6-Question reboot test
-5. Present recovery summary; continue from Next Action
+| Error | Diagnosis | Resolution | Date |
+|-------|-----------|------------|------|
 
-### Anti-patterns
+### Context Compaction Recovery
 
-| Don't | Do instead |
+After `/clear` or context compression, follow this protocol:
+
+1. Read `progress.md` — get status, current step, next action from header
+2. Read the recovery block at the top of `progress.md` (it tells you exactly what to do)
+3. Read `SPEC.md` for full requirements
+4. Read `mockups.md` for the current system/workflow/UI shape
+5. Read `plan.md` (if exists) for concrete steps
+6. Read `findings.md` (if exists) for research context
+7. Check recent changes: `git diff --stat` and `git log --oneline -5`
+8. Run the 6-Question Reboot Test — verify you can answer all six
+9. Present recovery summary and continue from Next Action
+
+### Anti-Patterns
+
+| Don't | Do Instead |
 |---|---|
 | State goals once and forget | Re-read plan before decisions |
-| Hide errors and retry silently | Log to `progress.md` Errors |
+| Hide errors and retry silently | Log errors to progress.md Errors table |
 | Start implementing without reading | Read spec files first |
-| Implement during a pure `/spec` turn | Spec artifacts only until approval |
-| Repeat failed actions | 3-Strike rule |
-| Keep research only in chat | 2-Action rule → disk |
-| Leave diagrams implicit | Keep `mockups.md` concrete and current |
-| Skip progress updates | Update after every step |
-| Continue from memory after compaction | Full recovery protocol |
-| Auto-dump a complete spec | Write collaboratively |
-| Hardcode another repo's migration paths | Discover this repo's conventions |
+| Repeat failed actions | Track attempts, mutate approach (3-Strike Rule) |
+| Accumulate content in conversation | Write to disk immediately (2-Action Rule) |
+| Leave diagrams implicit or in memory | Keep `mockups.md` current and concrete |
+| Skip progress updates | Update after EVERY step |
+| Continue from memory after compaction | Re-read all spec files (Recovery Protocol) |
+| Auto-generate and dump a complete spec | Write collaboratively with the user |

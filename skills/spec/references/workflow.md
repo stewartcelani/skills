@@ -1,63 +1,106 @@
 # Spec Workflow Reference
 
-Companion notes for the `spec` skill. Prefer `SKILL.md` as the source of truth;
-use this file for quick refresh after context compaction.
+## Adaptive Sizing
 
-## Adaptive sizing
+Determine size from the user's description. Tell the user what size you picked and why.
 
-| Size | Signals | Files |
-|------|---------|-------|
-| Small | fix / tweak / rename / single file | SPEC + mockups + progress |
-| Medium | add / build / 2–5 files / sequenced steps | + plan |
-| Large | research / migrate / redesign / unknowns | + findings |
+### Small
+**Signals:** "fix", "update", "tweak", "rename", "config change", description < 3 sentences, single-file change
+**Files created:** SPEC.md + mockups.md + progress.md
+**Example:** "Fix the 404 page styling" — one file, clear scope, no unknowns.
 
-Tell the user the size you picked and why. Promote later if needed.
+### Medium
+**Signals:** "add", "create", "implement", "build", 2-5 files affected, needs sequenced steps
+**Files created:** SPEC.md + mockups.md + plan.md + progress.md
+**Example:** "Add webhook retries with exponential backoff" — multiple files (handler, options, errors, page, tests), known pattern.
+
+### Large
+**Signals:** "evaluate", "research", "migrate", "redesign", "investigate", 5+ files, unknowns exist
+**Files created:** SPEC.md + mockups.md + plan.md + progress.md + findings.md
+**Example:** "Migrate session storage to a shared cache" — research needed, many files, architectural decisions.
+
+**Override:** User can always request a different size. Files can be added later (small can promote to medium).
 
 ## Naming
 
-- Kebab-case feature folder under `spec/`
-- Optional area prefix for discoverability (`api-…`, `web-…`, `mobile-…`, `shared-…`)
-- Infer from request + code surface when the user does not name it
-- Follow repository-local conventions when documented in `AGENTS.md` / similar
+Spec names should be kebab-case under `spec/`. Prefix with the affected component or product area when that improves discoverability:
 
-## Required artifacts
+- `api-*`, `web-*`, `mobile-*`, `worker-*` — by surface
+- `shared-*` / `platform-*` — genuinely cross-cutting work
+- Follow any repository-local conventions documented in `AGENTS.md` (or equivalent)
 
-- **`mockups.md`** — system/workflow always; UI when relevant; keep current
-- **`## ELI10` in SPEC.md** — plain language; update with scope changes
-- **Recovery block** in `progress.md` — copy verbatim from the template
-- **`sql-runbook.md`** — when schema/SQL changes are in scope
+Infer the prefix from the request and code surface when the user does not provide one.
 
-## Progress updates
+## Required Mockups
 
-- After each plan step → Current Step, Next Action, session log
-- Decisions / blockers / errors → tables in `progress.md`
-- Architecture or UI shape change → update `mockups.md`
-- End of session → latest log entry has **`Next:`**
+Every spec requires `mockups.md`.
 
-## Compaction recovery order
+- Always include system diagrams and workflow diagrams.
+- Include UI diagrams or wireframes when the feature affects user-facing UI.
+- Update `mockups.md` whenever architecture, workflow shape, or UI flow changes.
 
-1. `progress.md`
-2. `SPEC.md`
-3. `mockups.md`
-4. `plan.md` (if present)
-5. `findings.md` / `GOAL.md` (if present)
-6. `git diff --stat` && `git log --oneline -5`
-7. 6-Question reboot test
-8. Summarize and continue from Next Action
+## Required ELI10
 
-## Collaborative writing
+Every `SPEC.md` requires an `## ELI10` section immediately after the title and before `## Summary`.
 
-1. Read relevant codebase context
-2. Draft sections; discuss with the user
-3. Ask targeted questions for gaps
-4. Iterate requirements and acceptance criteria
-5. Finalize only when the user confirms
+- Keep it short and plain.
+- Explain what is changing, why it matters, the safest next step, and what is explicitly not
+  happening yet.
+- Update it whenever the scope, phase boundary, or next action changes.
 
-Do not auto-generate and dump a full document as a first move.
+## Progress Update Rules
 
-## Spec vs implementation
+Update `progress.md`:
+- **After completing each plan step** — Mark step complete, update Current Step and Next Action header fields
+- **When making a decision** — Add row to Decisions table with rationale
+- **When hitting a blocker** — Add to Blockers list
+- **When encountering an error** — Add to Errors table with diagnosis and resolution
+- **When architecture, workflow, or UI shape changes** — Update `mockups.md`
+- **Before ending a session** — Ensure the latest session log entry has a "Next:" line
 
-| Phase | Writes under `spec/` | Application code |
-|-------|----------------------|------------------|
-| `/spec` / plan / findings | Yes | No |
-| Explicit implement / build / apply | Yes (progress) | Yes |
+The "Next:" line is the single most important field. It's what makes cross-conversation recovery work: the next agent reads it and knows exactly what to do.
+
+## Context Compaction Recovery
+
+When resuming after context compaction or `/clear`, read files in this order:
+
+1. `progress.md` — Machine-readable header gives instant context (status, current step, next action). The recovery block at the top has step-by-step instructions.
+2. `SPEC.md` — Full requirements for reference
+3. `mockups.md` — Current system/workflow/UI diagrams
+4. `plan.md` (if exists) — Concrete steps and current position
+5. `findings.md` (if exists) — Research context
+
+Then run:
+- `git diff --stat` — What changed since last session
+- `git log --oneline -5` — Recent commits for context
+
+Run the 6-Question Reboot Test:
+
+| Question | Source |
+|---|---|
+| Where am I? | Current Step in `progress.md` |
+| Where am I going? | Remaining steps in `plan.md` |
+| What's the goal? | Summary in `SPEC.md` |
+| What does it look like? | `mockups.md` |
+| What have I learned? | `findings.md` |
+| What have I done? | Session Log in `progress.md` |
+
+Present a recovery summary:
+> Last session: {date}. Status: {status}. Last completed: {step}. Next: {action}.
+
+## Collaborative Spec Writing
+
+When writing a spec, do NOT auto-generate a complete document and dump it. Instead:
+
+1. Read relevant codebase context (CLAUDE.md, .claude-docs/, source files)
+2. Draft each section and discuss with the user
+3. Ask targeted questions to fill gaps
+4. Iterate on requirements and acceptance criteria together
+5. Only finalize when the user confirms
+
+The goal is a spec that captures the user's intent accurately, not a template filled with generic content.
+
+## Relationship to Existing Systems
+
+### docs/PRDs/ (Legacy)
+The `docs/PRDs/` directory contains legacy product requirement documents. New features should use `spec/` instead. No migration needed — legacy PRDs stay as-is.

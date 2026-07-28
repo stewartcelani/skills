@@ -60,7 +60,7 @@ Spec-driven engineering process for any codebase.
 
 | Skill | Description |
 |-------|-------------|
-| [`spec`](./skills/spec/) | Spec-driven development under `spec/{feature}/`. Collaborative specs, mockups, plans, progress recovery, optional SQL runbooks and GOAL handoff. Spec turns stay write-scoped to `spec/` until you approve implementation. |
+| [`spec`](./skills/spec/) | Spec-driven development under `spec/{feature}/`. Collaborative specs with required ELI10 + mockups, adaptive sizing, plan/progress recovery, and compaction reboot protocol. Intent from natural language — no subcommands. |
 
 #### spec (quick start)
 
@@ -72,21 +72,21 @@ Then in any project, ask the agent things like:
 
 - `/spec` or “write a spec for webhook retries”
 - “plan the implementation for X”
+- “let’s build X” / “implement X”
 - “where are we on X” / “spec status”
-- “write GOAL.md” (handoff only after you’ve accepted the spec)
 
 Typical layout created for a feature:
 
 ```
 spec/my-feature/
-  SPEC.md          # Requirements + ELI10
-  mockups.md       # System / workflow / UI diagrams
+  SPEC.md          # Requirements + required ELI10
+  mockups.md       # System / workflow / UI diagrams (required)
   progress.md      # Status, session log, recovery block
   plan.md          # Implementation steps (medium+)
   findings.md      # Research notes (large)
-  sql-runbook.md   # Draft SQL if schema changes
-  GOAL.md          # Optional execution contract
 ```
+
+Templates live in the skill under `templates/`; workflow notes under `references/workflow.md`.
 
 ## Repository layout
 
