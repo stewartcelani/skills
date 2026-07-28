@@ -38,6 +38,7 @@ Every spec requires `mockups.md`.
 - Always include system diagrams and workflow diagrams.
 - Include UI diagrams or wireframes when the feature affects user-facing UI.
 - Update `mockups.md` whenever architecture, workflow shape, or UI flow changes.
+- This is the **golden first look** for “are we on the same page?” before code.
 
 ## Required ELI10
 
@@ -47,6 +48,13 @@ Every `SPEC.md` requires an `## ELI10` section immediately after the title and b
 - Explain what is changing, why it matters, the safest next step, and what is explicitly not
   happening yet.
 - Update it whenever the scope, phase boundary, or next action changes.
+
+## Rush review order
+
+1. `SPEC.md` → `## ELI10` bullets
+2. `mockups.md`
+
+Only then deeper docs (`plan.md`, findings, full requirements).
 
 ## Progress Update Rules
 

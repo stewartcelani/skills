@@ -64,6 +64,7 @@ Every spec MUST include `spec/{name}/mockups.md`.
 - If the work has any user-facing UI, also include UI diagrams or mockups that show the relevant screens, panels, states, and transitions.
 - These can be lightweight ASCII diagrams, Mermaid, markdown tables, or annotated wireframes, but they must be concrete enough that the user can validate the shape of the solution quickly.
 - A spec is not complete until `mockups.md` exists on disk and matches the current spec.
+- **`mockups.md` is the golden alignment check** — the fastest way for the user and the model to confirm they mean the same product shape before code exists. Treat it as a review gate, not decoration.
 
 ## CRITICAL: ELI10 Rule
 
@@ -76,6 +77,15 @@ Every `SPEC.md` MUST include an `## ELI10` section immediately after the title a
   happening yet.
 - Keep it short: one small paragraph or 3-6 bullets.
 - Update it whenever scope, phase boundaries, or the next action changes.
+
+## CRITICAL: Rush review order
+
+When the user is reviewing quickly (or asks “just check the shape”), present and prioritize in this order:
+
+1. **`SPEC.md` → `## ELI10`** — the top bullets only
+2. **`mockups.md`** — diagrams / workflows / wireframes
+
+If those two are wrong, fix them before deep-diving `plan.md`, findings, or implementation. Do not bury alignment under long prose.
 
 ## CRITICAL: Recovery Block
 

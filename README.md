@@ -77,14 +77,34 @@ Spec-driven engineering process for any codebase.
 
 #### Why `/spec` (how I actually use it)
 
-I run this for **any non-trivial work** — which in practice is almost everything past a one-liner fix. Specs live as real files under `spec/{feature}/`, not as chat vapor.
+I run this for **any non-trivial work** — which in practice is almost everything past a one-liner fix. Specs live as real markdown under `spec/{feature}/`, not as chat vapor.
 
 What that buys you:
 
 - **Multi-day goals stay on rails.** Context windows compact and sessions die; the files don’t. `progress.md` always has a recovery block and a **Next:** line so the next session (or a cold agent) can resume without re-deriving the plan from memory.
 - **Handoffs are cheap.** Point another model (or another person) at the same `SPEC.md` + `mockups.md` + `plan.md` + `progress.md`. They can implement, critique, or continue without the original conversation.
-- **Spec review is first-class.** Before code, you get something reviewable: plain-language ELI10, acceptance criteria, and concrete mockups/workflows. Easy to send to a second model for a “does this make sense?” pass.
-- **No planning mode tax.** With a solid `spec/` tree I stopped relying on each product’s ephemeral “plan mode.” The plan is in the repo, versioned, and portable across Claude / Codex / Cursor / whatever. One workflow, any model.
+- **Spec review is first-class.** Before code, you get something reviewable. Easy to send to a second model for a “does this make sense?” pass.
+- **No planning mode tax.** With a solid `spec/` tree I stopped relying on each product’s ephemeral “plan mode.” The plan is durable files, portable across Claude / Codex / Cursor / whatever. One workflow, any model.
+
+##### Rush review order (you or another model)
+
+When you’re short on time, don’t read the whole tree first:
+
+1. **`SPEC.md` → `## ELI10`** — the bullet points at the top. Plain language: what’s changing, why, safest next step, what’s *not* happening yet.
+2. **`mockups.md`** — the **golden first look**. Diagrams / workflows / wireframes that prove you and the model are on the same page about *shape* before anyone writes code.
+
+If those two disagree with what you wanted, fix them and stop. Everything else (`plan.md`, acceptance criteria, findings) is downstream of that alignment.
+
+`mockups.md` is not optional filler. Even for backend-only work it should show the workflow, data flow, or before/after shape. That file is the fastest way to catch “the model built a different product than I meant.”
+
+##### Reading specs anywhere (Obsidian)
+
+I **symlink the project’s `spec/` tree into an Obsidian vault** (the vault is *not* the git repo — just a viewer/sync surface). Obsidian Sync (or your preferred sync) then hits every device:
+
+- Code and agents on a remote box over **SSH**
+- Read / annotate the same markdown on **desktop, Mac, or phone** in Obsidian
+
+Agents still write through the project path (`spec/...`). The symlink means those files show up as normal notes in the vault without duplicating content or committing the vault into the codebase.
 
 The skill keeps agents honest during a pure `/spec` turn: research and write under `spec/` only, then stop for approval before implementation.
 
