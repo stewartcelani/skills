@@ -91,11 +91,15 @@ What that buys you:
 When you’re short on time, don’t read the whole tree first:
 
 1. **`SPEC.md` → `## ELI10`** — the bullet points at the top. Plain language: what’s changing, why, safest next step, what’s *not* happening yet.
-2. **`mockups.md`** — the **golden first look**. Diagrams / workflows / wireframes that prove you and the model are on the same page about *shape* before anyone writes code.
+2. **`mockups.md`** — the **golden first look**. These mockups cover **both**:
+   - **UI diagrams** — screens, panels, states, interactions (when anything is user-facing)
+   - **System / process diagrams** — architecture, workflows, data flow, sequence/state (always — including backend-only work)
+
+   Together they prove you and the model are on the same page about *shape* before anyone writes code.
 
 If those two disagree with what you wanted, fix them and stop. Everything else (`plan.md`, acceptance criteria, findings) is downstream of that alignment.
 
-`mockups.md` is not optional filler. Even for backend-only work it should show the workflow, data flow, or before/after shape. That file is the fastest way to catch “the model built a different product than I meant.”
+`mockups.md` is not optional filler and is not “just wireframes.” UI *and* system/process views belong in the same file. That combo is the fastest way to catch “the model built a different product than I meant.”
 
 ##### Reading specs anywhere (Obsidian)
 

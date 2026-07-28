@@ -33,10 +33,11 @@ Infer the prefix from the request and code surface when the user does not provid
 
 ## Required Mockups
 
-Every spec requires `mockups.md`.
+Every spec requires `mockups.md`, covering **both**:
 
-- Always include system diagrams and workflow diagrams.
-- Include UI diagrams or wireframes when the feature affects user-facing UI.
+- **System / process diagrams** (always) — architecture, workflows, data flow, sequence/state.
+- **UI diagrams** (when user-facing) — screens, panels, states, interactions.
+
 - Update `mockups.md` whenever architecture, workflow shape, or UI flow changes.
 - This is the **golden first look** for “are we on the same page?” before code.
 

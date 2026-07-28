@@ -60,8 +60,11 @@ The user mentions a spec naturally — the agent determines intent from context:
 
 Every spec MUST include `spec/{name}/mockups.md`.
 
-- Always include system diagrams, workflow diagrams, sequence diagrams, state diagrams, or other architecture views that explain how the feature works end to end.
-- If the work has any user-facing UI, also include UI diagrams or mockups that show the relevant screens, panels, states, and transitions.
+Mockups mean **both** of these (not only UI wireframes):
+
+- **System / process diagrams** (always) — architecture, workflows, data flow, sequence, state machines, and other end-to-end process views.
+- **UI diagrams** (whenever anything is user-facing) — screens, panels, states, transitions, and interaction flows.
+
 - These can be lightweight ASCII diagrams, Mermaid, markdown tables, or annotated wireframes, but they must be concrete enough that the user can validate the shape of the solution quickly.
 - A spec is not complete until `mockups.md` exists on disk and matches the current spec.
 - **`mockups.md` is the golden alignment check** — the fastest way for the user and the model to confirm they mean the same product shape before code exists. Treat it as a review gate, not decoration.
