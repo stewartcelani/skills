@@ -53,9 +53,11 @@ Domain DN is discovered automatically via `LDAP://RootDSE` — no hardcoded doma
 | Domain LDAP (`groupPolicyContainer` + `gPLink`) | Domain-wide inventory + **linked vs unlinked** |
 | `gpresult /scope user` | Applied user GPOs for **this** session user |
 
-Clients do **not** sync the full link topology. Domain LDAP from a normal domain
-user typically **does** (GPC objects and OU `gPLink` are readable without admin
-rights in most environments).
+Clients do **not** sync the full link topology. Domain LDAP from a **normal
+authenticated domain user** typically **does** — that is by design in Active
+Directory: GPC objects and OU/site `gPLink` are readable without Domain Admin
+or RSAT in default (and most) forests. No special GPO role is required for
+this inventory. Unusually locked-down forests may differ.
 
 ## How to work
 

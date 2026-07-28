@@ -41,9 +41,22 @@ Windows / Active Directory operational tooling for domain environments.
 |-------|-------------|
 | [`gpmc`](./skills/gpmc/) | Read-only Active Directory Group Policy inventory via LDAP — list GPOs, link topology (enabled/disabled/enforced), unlinked GPOs, search, and current-user RSoP. No RSAT required. Domain-agnostic (RootDSE). Windows + domain-joined. |
 
+#### gpmc — works as a normal domain user
+
+You do **not** need Domain Admin, a “GPO admin” role, or the RSAT Group Policy module.
+
+That’s how Active Directory is designed: authenticated domain users can normally **read** Group Policy Containers (`groupPolicyContainer`) and `gPLink` attributes on domain/OU/site objects over LDAP. Clients never get a full link topology locally — they only see what applied to them — but a domain-joined workstation (or any host that can reach a DC) can query the directory as the signed-in user.
+
+So this skill is:
+
+- **Read-only inventory** for the whole domain’s GPO *objects* and *links* (enabled / disabled / enforced)
+- Runnable by **any normal domain user** with default read rights (unusual locked-down forests may differ)
+- Free of GPMC GUI / RSAT dependency (pure LDAP + optional local `gpresult`)
+- **Not** full RSoP for *other* users/PCs (security filtering + WMI still matter); not computer RSoP without elevation
+
 #### gpmc (quick start)
 
-On a domain-joined Windows host:
+On a domain-joined Windows host, as your normal domain account:
 
 ```powershell
 # After install, skill-dir is typically .agents/skills/gpmc or .claude/skills/gpmc
@@ -61,6 +74,19 @@ Spec-driven engineering process for any codebase.
 | Skill | Description |
 |-------|-------------|
 | [`spec`](./skills/spec/) | Spec-driven development under `spec/{feature}/`. Collaborative specs with required ELI10 + mockups, adaptive sizing, plan/progress recovery, and compaction reboot protocol. Intent from natural language — no subcommands. |
+
+#### Why `/spec` (how I actually use it)
+
+I run this for **any non-trivial work** — which in practice is almost everything past a one-liner fix. Specs live as real files under `spec/{feature}/`, not as chat vapor.
+
+What that buys you:
+
+- **Multi-day goals stay on rails.** Context windows compact and sessions die; the files don’t. `progress.md` always has a recovery block and a **Next:** line so the next session (or a cold agent) can resume without re-deriving the plan from memory.
+- **Handoffs are cheap.** Point another model (or another person) at the same `SPEC.md` + `mockups.md` + `plan.md` + `progress.md`. They can implement, critique, or continue without the original conversation.
+- **Spec review is first-class.** Before code, you get something reviewable: plain-language ELI10, acceptance criteria, and concrete mockups/workflows. Easy to send to a second model for a “does this make sense?” pass.
+- **No planning mode tax.** With a solid `spec/` tree I stopped relying on each product’s ephemeral “plan mode.” The plan is in the repo, versioned, and portable across Claude / Codex / Cursor / whatever. One workflow, any model.
+
+The skill keeps agents honest during a pure `/spec` turn: research and write under `spec/` only, then stop for approval before implementation.
 
 #### spec (quick start)
 
