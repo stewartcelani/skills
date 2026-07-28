@@ -6,6 +6,11 @@
       "title": "Sysadmin",
       "description": "Windows, Active Directory, and operational admin tooling",
       "skills": ["gpmc"]
+    },
+    {
+      "title": "Development",
+      "description": "Spec-driven workflows and engineering process skills",
+      "skills": ["spec"]
     }
   ]
 }

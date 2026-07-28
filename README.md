@@ -15,14 +15,18 @@ npx skills add stewartcelani/skills
 # List what’s available first
 npx skills add stewartcelani/skills --list
 
-# Install a specific skill (project-scoped)
+# Install specific skills (project-scoped)
 npx skills add stewartcelani/skills --skill gpmc
+npx skills add stewartcelani/skills --skill spec
+
+# Install both
+npx skills add stewartcelani/skills --skill gpmc --skill spec
 
 # Global install (available in every project)
-npx skills add -g stewartcelani/skills --skill gpmc
+npx skills add -g stewartcelani/skills --skill spec
 
 # Non-interactive / CI
-npx skills add stewartcelani/skills --skill gpmc -g -y
+npx skills add stewartcelani/skills --skill spec -g -y
 ```
 
 Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, GitHub Copilot, Cline, and many other agents supported by the CLI.
@@ -50,16 +54,54 @@ powershell.exe -ExecutionPolicy Bypass -File ".\.agents\skills\gpmc\scripts\Quer
 
 Actions: `list` · `unlinked` · `links` · `links-on` · `gpo` · `search` · `rsop-user` · `summary` · optional `-Json`.
 
+### Development
+
+Spec-driven engineering process for any codebase.
+
+| Skill | Description |
+|-------|-------------|
+| [`spec`](./skills/spec/) | Spec-driven development under `spec/{feature}/`. Collaborative specs, mockups, plans, progress recovery, optional SQL runbooks and GOAL handoff. Spec turns stay write-scoped to `spec/` until you approve implementation. |
+
+#### spec (quick start)
+
+```bash
+npx skills add stewartcelani/skills --skill spec
+```
+
+Then in any project, ask the agent things like:
+
+- `/spec` or “write a spec for webhook retries”
+- “plan the implementation for X”
+- “where are we on X” / “spec status”
+- “write GOAL.md” (handoff only after you’ve accepted the spec)
+
+Typical layout created for a feature:
+
+```
+spec/my-feature/
+  SPEC.md          # Requirements + ELI10
+  mockups.md       # System / workflow / UI diagrams
+  progress.md      # Status, session log, recovery block
+  plan.md          # Implementation steps (medium+)
+  findings.md      # Research notes (large)
+  sql-runbook.md   # Draft SQL if schema changes
+  GOAL.md          # Optional execution contract
+```
+
 ## Repository layout
 
 ```
 skills/
   gpmc/
-    SKILL.md          # Agent instructions + YAML frontmatter
-    scripts/          # Helper automation
+    SKILL.md
+    scripts/
+  spec/
+    SKILL.md
+    references/
+    templates/
 ```
 
-Optional `skills.sh.json` controls grouping/order on the [skills.sh](https://skills.sh) repository page.
+Optional `skills.sh.json` controls grouping/order on the [skills.sh](https://skills.sh) repository page (**Sysadmin**, **Development**).
 
 ## Day-to-day CLI
 
@@ -76,6 +118,7 @@ npx skills remove        # uninstall
 - Treat skills like code. Scripts may run commands on your machine.
 - Review `SKILL.md` and any `scripts/` before installing in sensitive environments.
 - `gpmc` is intentionally **read-only** (LDAP query + local `gpresult`).
+- `spec` writes under `spec/` by design; implementation outside that tree only after you approve.
 
 ## License
 
