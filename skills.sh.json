@@ -5,7 +5,7 @@
     {
       "title": "Development",
       "description": "Spec-driven workflows, handoffs, and engineering process skills",
-      "skills": ["spec", "codex-session", "claude-session"]
+      "skills": ["spec", "codex-session", "claude-session", "ship"]
     },
     {
       "title": "Sysadmin",

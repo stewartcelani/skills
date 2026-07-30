@@ -15,7 +15,7 @@ npx skills add stewartcelani/skills --list
 npx skills add stewartcelani/skills --skill spec
 
 # All skills in this repository
-npx skills add stewartcelani/skills --skill spec --skill codex-session --skill claude-session --skill gpmc
+npx skills add stewartcelani/skills --skill spec --skill codex-session --skill claude-session --skill ship --skill gpmc
 
 # Global install
 npx skills add -g stewartcelani/skills --skill spec
@@ -30,6 +30,7 @@ Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, GitHub Copilot, Cline
 | Development | [`spec`](./skills/spec/) | Plan and persist non-trivial engineering work in durable feature files. |
 | Development | [`codex-session`](./skills/codex-session/) | Recover a local Codex task by GUID, title, phrase, or recent activity. |
 | Development | [`claude-session`](./skills/claude-session/) | Recover a local Claude Code conversation by GUID, title, phrase, or recent activity. |
+| Development | [`ship`](./skills/ship/) | Intentionally commit and push every current Git-trackable change in one operation. |
 | Sysadmin | [`gpmc`](./skills/gpmc/) | Inventory Active Directory Group Policy safely, without RSAT. |
 
 ## Development
@@ -111,6 +112,22 @@ It finds conversations by recency, session ID, title, or a phrase in the transcr
 
 When moving recovered work to a new Claude conversation or Codex, either session skill can create a compact, redacted recovery packet containing the goal, constraints, completed work, decisions, verification, blockers, and next action. The recipient should still inspect the repository and referenced artifacts.
 
+### `ship` — commit and push everything
+
+Use `/ship` when you deliberately want one commit containing every current Git-trackable working-tree change, followed by a push of the current branch. It is the opposite of a selective, tidy-commit workflow.
+
+```text
+/ship
+  ↓
+git add -A
+  ↓
+one accurate commit
+  ↓
+push current branch
+```
+
+Mixed, broad, generated, staged, unstaged, untracked, or unrelated-looking changes are included without prompting. Git-ignored files remain ignored unless you explicitly name them. It does not open a pull request, rebase, force-push, or bypass failed hooks unless you explicitly ask.
+
 ## Sysadmin
 
 ### `gpmc` — read-only Active Directory Group Policy inventory
@@ -152,6 +169,8 @@ skills/
   claude-session/
     SKILL.md
     scripts/
+  ship/
+    SKILL.md
   gpmc/
     SKILL.md
     scripts/
@@ -175,6 +194,7 @@ npx skills remove <skill>
 - `gpmc` is intentionally read-only.
 - `spec` writes under `spec/`; implementation outside that tree follows user approval.
 - `codex-session` and `claude-session` read local conversation records without modifying them and redact sensitive excerpts by default.
+- `ship` deliberately stages and pushes every Git-trackable worktree change when explicitly invoked.
 
 ## License
 
