@@ -3,14 +3,14 @@
   "notGrouped": "bottom",
   "groupings": [
     {
+      "title": "Development",
+      "description": "Spec-driven workflows, handoffs, and engineering process skills",
+      "skills": ["spec", "codex-session", "claude-session"]
+    },
+    {
       "title": "Sysadmin",
       "description": "Windows, Active Directory, and operational admin tooling",
       "skills": ["gpmc"]
-    },
-    {
-      "title": "Development",
-      "description": "Spec-driven workflows and engineering process skills",
-      "skills": ["spec"]
     }
   ]
 }

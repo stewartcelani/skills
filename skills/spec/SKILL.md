@@ -41,7 +41,7 @@ The user mentions a spec naturally — the agent determines intent from context:
 **Every operation MUST write its output files to disk before completing.** This is non-negotiable.
 
 - Generating spec content in the conversation is NOT enough — it MUST be saved with the Write tool to `spec/{name}/`
-- After writing each file, verify it exists: `ls -la spec/{name}/`
+- After writing each file, verify it exists by listing `spec/{name}/` with the current environment's file tools.
 - NEVER consider work complete until all required output files are confirmed on disk
 - If work is interrupted, the files written so far are the only thing that survives — conversation context is lost between sessions
 
@@ -134,7 +134,7 @@ Determine size from the user's description. Tell the user what size you picked a
 ### Starting a New Spec
 
 1. **Validate name.** Convert to kebab-case, apply a useful component prefix when appropriate, and check `spec/{name}/` does not already exist.
-2. **Create directory:** `mkdir -p spec/{name}/`
+2. **Create directory:** Create `spec/{name}/` with the current environment's file tools.
 3. **Determine size** using heuristics above. Tell the user: "This looks like a **{size}** spec — I'll create {files}."
 4. **Explore the codebase** for relevant context:
    - Read repo `AGENTS.md` and any relevant local `AGENTS.md` files
@@ -151,7 +151,7 @@ Determine size from the user's description. Tell the user what size you picked a
    - **SAVE CHECKPOINT:** Write `spec/{name}/progress.md` immediately.
 8. **Save findings.md** (large specs only) with any research gathered in step 4.
    - **SAVE CHECKPOINT:** Write `spec/{name}/findings.md` immediately.
-9. **Verify all files exist:** `ls -la spec/{name}/`
+9. **Verify all files exist:** List `spec/{name}/` with the current environment's file tools.
 
 ### Creating a Plan
 
@@ -166,7 +166,7 @@ Determine size from the user's description. Tell the user what size you picked a
    - **SAVE CHECKPOINT:** Edit `spec/{name}/mockups.md` immediately when the diagrams need to change.
 5. **Update progress.md** — Set status to `planned`, add session log entry.
    - **SAVE CHECKPOINT:** Edit `spec/{name}/progress.md` immediately.
-6. **Verify files saved:** `ls -la spec/{name}/`
+6. **Verify files saved:** List `spec/{name}/` with the current environment's file tools.
 
 ### Implementing
 
@@ -259,7 +259,7 @@ After `/clear` or context compression, follow this protocol:
 4. Read `mockups.md` for the current system/workflow/UI shape
 5. Read `plan.md` (if exists) for concrete steps
 6. Read `findings.md` (if exists) for research context
-7. Check recent changes: `git diff --stat` and `git log --oneline -5`
+7. Inspect the current repository diff/stat and recent commits with the available Git interface.
 8. Run the 6-Question Reboot Test — verify you can answer all six
 9. Present recovery summary and continue from Next Action
 
