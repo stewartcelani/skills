@@ -27,7 +27,7 @@ Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, GitHub Copilot, Cline
 
 | Area | Skill | Use it when you need to… |
 |---|---|---|
-| Development | [`spec`](./skills/spec/) | Plan and persist non-trivial engineering work in durable feature files. |
+| Development | [`spec`](./skills/spec/) | Plan and persist non-trivial engineering work — from a one-file fix to a multi-slice epic — in durable feature files. |
 | Development | [`codex-session`](./skills/codex-session/) | Recover a local Codex task by GUID, title, phrase, or recent activity. |
 | Development | [`claude-session`](./skills/claude-session/) | Recover a local Claude Code conversation by GUID, title, phrase, or recent activity. |
 | Development | [`ship`](./skills/ship/) | Intentionally commit and push every current Git-trackable change in one operation. |
@@ -67,6 +67,31 @@ Why it exists:
 - `mockups.md` is the fast alignment check: system/process diagrams always, plus UI diagrams when relevant.
 
 For a fast review, read `SPEC.md` → `## ELI10` first, then `mockups.md`. If either is wrong, fix the shape before planning or implementation.
+
+#### Epics — when the goal is bigger than one spec
+
+Work is sized `small`, `medium`, `large`, or `epic`. An epic is a goal with three or more independently shippable slices. Rather than one enormous `SPEC.md`, it becomes a thin parent that owns the goal plus numbered child specs that own the slices:
+
+```text
+spec/<epic>/
+    ├── EPIC.md       Destination, inherited constraints, child index, not-yet-split, out of scope
+    ├── mockups.md    Whole-system view and cross-child workflows
+    ├── progress.md   Active child, epic-wide decisions and blockers
+    ├── 01-<child>/   A normal spec, sized on its own merits
+    └── 02-<child>/
+```
+
+The parent is an index, so detail lives in exactly one place: it gists and links, never restates. It gets no `plan.md` — planning and building happen inside children. A session working child `02` loads that child plus the parent's constraints, not its siblings, which is what keeps a long-running epic inside one context window.
+
+Slices you cannot specify yet stay as prose under **Not Yet Split** instead of becoming empty folders, since an empty numbered directory looks decomposed without anyone having decided what goes in it. Numbers are recommended delivery order, not identity — real dependencies are recorded in the child's blockers.
+
+```text
+spec out the local intelligence platform     # creates the epic
+add a child spec for meeting recording       # creates 03-meeting-recording/
+where are we on the platform?                # epic status with children indented
+```
+
+Pair it with a breadth-first interview (`/grill-me`) when charting the epic: settle the destination, the constraints every child inherits, the first shippable slice, and what is explicitly excluded. Depth comes later, inside each child. See [`skills/spec/references/epics.md`](./skills/spec/references/epics.md) for splitting heuristics, retrofitting an existing mega-spec, graduation, and archiving.
 
 ### `codex-session` — recover local Codex tasks
 
@@ -161,8 +186,8 @@ Actions: `list` · `unlinked` · `links` · `links-on` · `gpo` · `search` · `
 skills/
   spec/
     SKILL.md
-    references/
-    templates/
+    references/     workflow.md, epics.md
+    templates/      spec.md, epic.md, mockups.md, plan.md, progress.md, epic-progress.md, findings.md
   codex-session/
     SKILL.md
     scripts/

@@ -1,5 +1,8 @@
 # {Feature Name}
 
+<!-- Child of an epic? Add: **Epic:** [{Epic Name}](../EPIC.md) — and do not restate the epic's
+     shared constraints or vocabulary here. Comply with them and link. -->
+
 ## ELI10
 
 Explain this spec in plain language:

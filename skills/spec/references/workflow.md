@@ -19,7 +19,15 @@ Determine size from the user's description. Tell the user what size you picked a
 **Files created:** SPEC.md + mockups.md + plan.md + progress.md + findings.md
 **Example:** "Migrate session storage to a shared cache" — research needed, many files, architectural decisions.
 
-**Override:** User can always request a different size. Files can be added later (small can promote to medium).
+### Epic
+**Signals:** a product, platform, or goal with 3+ independently shippable slices; a single SPEC.md would be unreadable in one sitting
+**Files created:** EPIC.md + mockups.md + progress.md (+ findings.md), plus `NN-{child}/` directories for the slices that are already sharp
+**Example:** "Build the local intelligence platform" — dictation, meeting capture, and speaker attribution each ship separately.
+
+Epic is about decomposition, not length. Big work that still ships as one unit is `large`.
+Full guidance: [epics.md](epics.md).
+
+**Override:** User can always request a different size. Files can be added later (small can promote to medium; large can promote to an epic).
 
 ## Naming
 
@@ -31,9 +39,14 @@ Spec names should be kebab-case under `spec/`. Prefix with the affected componen
 
 Infer the prefix from the request and code surface when the user does not provide one.
 
+Epic children are `NN-kebab-name` inside the epic directory, numbered from `01` in recommended
+delivery order. The epic name already carries the context, so children do not repeat it:
+`spec/local-intelligence-platform/02-push-to-talk-dictation/`, not `02-platform-push-to-talk`.
+
 ## Required Mockups
 
-Every spec requires `mockups.md`, covering **both**:
+Every spec requires `mockups.md` — including an epic parent, where it holds the whole-system view and
+any workflow that crosses child boundaries. It covers **both**:
 
 - **System / process diagrams** (always) — architecture, workflows, data flow, sequence/state.
 - **UI diagrams** (when user-facing) — screens, panels, states, interactions.
@@ -44,6 +57,7 @@ Every spec requires `mockups.md`, covering **both**:
 ## Required ELI10
 
 Every `SPEC.md` requires an `## ELI10` section immediately after the title and before `## Summary`.
+Every `EPIC.md` requires one immediately after the title and before `## Destination`.
 
 - Keep it short and plain.
 - Explain what is changing, why it matters, the safest next step, and what is explicitly not
@@ -79,6 +93,10 @@ When resuming after context compaction or `/clear`, read files in this order:
 4. `plan.md` (if exists) — Concrete steps and current position
 5. `findings.md` (if exists) — Research context
 
+Inside an epic, start at the parent's `progress.md` to find the Active Child, read the parent's
+`EPIC.md` for destination and shared constraints, then recover the active child normally. Do not load
+sibling children.
+
 Then run:
 - `git diff --stat` — What changed since last session
 - `git log --oneline -5` — Recent commits for context
@@ -108,6 +126,10 @@ When writing a spec, do NOT auto-generate a complete document and dump it. Inste
 5. Only finalize when the user confirms
 
 The goal is a spec that captures the user's intent accurately, not a template filled with generic content.
+
+For an epic, interview **breadth-first** before writing: destination, inherited constraints, first
+shippable slice, explicit exclusions. `/grill-me` is the natural tool for this. Depth comes later,
+inside each child.
 
 ## Relationship to Existing Systems
 

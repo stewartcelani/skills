@@ -3,8 +3,10 @@ name: spec
 description: >-
   Spec-driven development in the active repository's spec/{feature}/ directory.
   Use when user says /spec,
-  "write a spec", "plan a feature", "create a PRD", "spec status", or
-  references spec/ directory. Determines intent from context — no subcommands.
+  "write a spec", "plan a feature", "create a PRD", "spec status", "spec out
+  this epic", or references spec/ directory. Sizes work from small to epic,
+  where an epic is a parent spec with numbered child specs. Determines intent
+  from context — no subcommands.
 license: MIT
 user-invocable: true
 allowed-tools:
@@ -21,6 +23,8 @@ allowed-tools:
 
 Manage feature specs in `spec/{feature-name}/`. Each feature gets its own directory with lean, focused documents.
 
+Work too large for one buildable spec becomes an **epic**: a thin parent at `spec/{epic-name}/EPIC.md` that owns the goal, plus numbered child specs at `spec/{epic-name}/01-{child-name}/` that own the shippable slices. See [references/epics.md](references/epics.md).
+
 Resolve the active repository from the current working directory, then use its repo-root `spec/` path in commands and links. It may be a normal directory or a symlink; inspect the resolved path before editing.
 
 Use a specific kebab-case feature name. Prefix it with the affected component or product when that improves discoverability; use `shared-*` or `platform-*` for genuinely cross-cutting work.
@@ -32,9 +36,10 @@ Keep active specs under `spec/`. If the repository has `spec-archive/`, read arc
 The user mentions a spec naturally — the agent determines intent from context:
 
 - If `spec/{name}/` doesn't exist → create it (new spec)
+- If `spec/{name}/EPIC.md` exists → this is an epic; read `EPIC.md` and `progress.md`, then work the active child
 - If `spec/{name}/progress.md` exists → read it, figure out where we are, continue
 - If only `spec-archive/{name}/` exists → read it for context and ask whether to reactivate it; do not edit archived specs in place
-- Always check first: does the directory exist? What files are in it? What's the status?
+- Always check first: does the directory exist? What files are in it? Is there an `EPIC.md` or numbered `NN-` children? What's the status?
 
 ## CRITICAL: File Persistence Rule
 
@@ -50,15 +55,17 @@ The user mentions a spec naturally — the agent determines intent from context:
 | Activity | MUST write to disk | Also write if applicable |
 |----------|-------------------|------------------------|
 | New spec | `spec/{name}/SPEC.md`, `spec/{name}/mockups.md`, `spec/{name}/progress.md` | `spec/{name}/findings.md` (large specs) |
+| New epic | `spec/{epic}/EPIC.md`, `spec/{epic}/mockups.md`, `spec/{epic}/progress.md` | `spec/{epic}/findings.md` |
+| New child spec | `spec/{epic}/NN-{child}/SPEC.md`, `mockups.md`, `progress.md`, plus the child's row in `EPIC.md` | `plan.md`, `findings.md` by child size |
 | Planning | `spec/{name}/plan.md`, update `spec/{name}/progress.md` | |
-| Implementing | Update `spec/{name}/progress.md` after each step | |
+| Implementing | Update `spec/{name}/progress.md` after each step | Update the child's status row in `EPIC.md` on phase change |
 | Resuming | Update `spec/{name}/progress.md` with recovery entry | |
 
 **Write early, write often.** If you draft a spec section, write it immediately. Don't accumulate content in conversation and write at the end — if the session ends early, everything unsaved is lost.
 
 ## CRITICAL: Diagram Rule
 
-Every spec MUST include `spec/{name}/mockups.md`.
+Every spec MUST include `spec/{name}/mockups.md`. An epic parent needs one too — the whole-system view and any workflow that crosses child boundaries. Each child keeps its own, scoped to its slice.
 
 Mockups mean **both** of these (not only UI wireframes):
 
@@ -72,7 +79,8 @@ Mockups mean **both** of these (not only UI wireframes):
 ## CRITICAL: ELI10 Rule
 
 Every `SPEC.md` MUST include an `## ELI10` section immediately after the title and before
-`## Summary`.
+`## Summary`. Every `EPIC.md` MUST include one too, immediately after the title and before
+`## Destination`.
 
 - Write it for a smart 10-year-old: plain language, short sentences, and no unexplained internal
   jargon.
@@ -94,6 +102,8 @@ If those two are wrong, fix them before deep-diving `plan.md`, findings, or impl
 
 Every `progress.md` MUST include the verbatim recovery block from [templates/progress.md](templates/progress.md) at the top. This is the mechanism that ensures the agent re-reads all spec files after context compaction. Never omit it. Never paraphrase it. Copy it exactly.
 
+An epic parent's `progress.md` uses the recovery block from [templates/epic-progress.md](templates/epic-progress.md) instead — same rule, and it points the next session at the active child rather than at every child.
+
 ## Determining Intent
 
 Do NOT require specific subcommand syntax. Parse what the user means from context:
@@ -101,8 +111,11 @@ Do NOT require specific subcommand syntax. Parse what the user means from contex
 | User says something like... | What to do |
 |---|---|
 | "spec out X", "write a spec for X", "create a PRD for X" | Create `spec/{name}/`, write SPEC.md collaboratively |
+| "spec out X" where X is a product, epic, or several shippable slices | Create the epic: `spec/{name}/EPIC.md` plus the children you can already specify |
+| "add a child spec for Y", "split off Y" | Create `spec/{epic}/NN-{y}/` and add its row to the epic's child index |
 | "plan the implementation for X", "plan X" | Read SPEC.md, explore codebase, write plan.md |
 | "let's build X", "implement X", "start building X" | Read all spec files, continue from Next Action |
+| "implement the epic" / "build {epic}" | Do not implement at the parent. Redirect to the epic's next child and work that |
 | "where are we on X", "spec status", `/spec` | Read progress.md, show status |
 | Any mention of an existing spec name | Read progress.md first, figure out what's needed |
 
@@ -127,7 +140,40 @@ Determine size from the user's description. Tell the user what size you picked a
 **Files created:** SPEC.md + mockups.md + plan.md + progress.md + findings.md
 **Example:** "Migrate session storage to a shared cache" — research needed, many files, architectural decisions.
 
-**Override:** User can always request a different size. Files can be added later (small can promote to medium).
+### Epic
+**Signals:** a product, platform, or goal with three or more independently shippable slices; the alternative is one SPEC.md nobody can read in one sitting
+**Files created:** EPIC.md + mockups.md + progress.md (+ findings.md), then one child spec directory per slice you can already specify
+**Example:** "Build the local intelligence platform" — dictation, meeting capture, and speaker attribution each ship on their own.
+
+Epic is about **decomposition, not length**. Big work that still ships as one unit is `large`.
+
+**Override:** User can always request a different size. Files can be added later (small can promote to medium; a large spec can be promoted to an epic by adding `EPIC.md` and moving its implementable sections into children).
+
+## Epics
+
+An epic is a parent spec plus numbered child specs:
+
+```text
+spec/{epic-name}/
+  EPIC.md            destination, shared constraints, vocabulary, child index, not-yet-split, out of scope
+  mockups.md         whole-system view and cross-child workflows
+  progress.md        active child, epic-wide decisions and blockers
+  findings.md        shared research (optional)
+  01-{child-name}/   a normal spec: SPEC.md + mockups.md + progress.md (+ plan.md, findings.md)
+  02-{child-name}/
+```
+
+Non-negotiable rules:
+
+- **Detail lives in exactly one place.** The parent gists and links; it never restates a child's requirements, criteria, or plan.
+- **The parent never gets a `plan.md`.** Implementation happens in children only.
+- **One level of nesting.** Children are small/medium/large, never epics.
+- **Only create a child you can specify now** — one with a writable ELI10 and mockups. Everything else stays as prose under **Not Yet Split**. Never pre-create empty numbered directories.
+- **`NN-` is delivery order, not identity.** Real dependencies go in the child's Blockers, not in the number.
+- **A child session loads the child plus the parent's ELI10, constraints, vocabulary, and child index** — not its siblings.
+- **The child's `progress.md` owns its status.** The parent's table is a cached view; refresh it on phase change.
+
+Read [references/epics.md](references/epics.md) before splitting, retrofitting an existing mega-spec, graduating a child to top level, or archiving an epic.
 
 ## What to Do
 
@@ -153,6 +199,36 @@ Determine size from the user's description. Tell the user what size you picked a
    - **SAVE CHECKPOINT:** Write `spec/{name}/findings.md` immediately.
 9. **Verify all files exist:** List `spec/{name}/` with the current environment's file tools.
 
+### Starting a New Epic
+
+1. **Validate name.** Kebab-case, product- or platform-level, and confirm `spec/{epic}/` does not already exist.
+2. **Confirm the size with the user:** "This looks like an **epic** — I'll create `EPIC.md` plus child specs for the slices we can already name."
+3. **Interview breadth-first before writing.** Run `/grill-me` (or ask directly if that skill is unavailable) to settle, in this order: the destination, the constraints every child inherits, the first shippable slice, and what is explicitly not in this epic. Breadth beats depth here — one sharp question per slice, not a deep dive into slice one.
+4. **Explore the codebase** for shared context: repo `AGENTS.md`, existing related specs, the surfaces the epic touches.
+5. **Write EPIC.md collaboratively** from [templates/epic.md](templates/epic.md), including `## ELI10`. Fill Destination, Shared Constraints, and Out of Scope first — they bound every child.
+   - **SAVE CHECKPOINT:** Write `spec/{epic}/EPIC.md` as soon as the destination and constraints are agreed.
+6. **Write the epic `mockups.md`** — the whole-system diagram and any workflow crossing child boundaries. Do not draw each child's internals here.
+   - **SAVE CHECKPOINT:** Write `spec/{epic}/mockups.md` immediately.
+7. **Write the epic `progress.md`** from [templates/epic-progress.md](templates/epic-progress.md), status `decomposing`, with the recovery block verbatim.
+   - **SAVE CHECKPOINT:** Write `spec/{epic}/progress.md` immediately.
+8. **Split what is sharp.** For each slice with a writable ELI10 and mockups, create a child (see below). Everything else goes into **Not Yet Split** as prose.
+9. **Save findings.md** if research was gathered.
+10. **Verify the tree exists** and report the recommended first child.
+
+Charting the epic is its own session's work. Do not roll straight into implementing child `01` unless the user asks.
+
+### Adding a Child Spec
+
+1. **Read** `spec/{epic}/EPIC.md` and its `progress.md` — destination, constraints, existing children.
+2. **Confirm the slice is shippable on its own.** Split by user-visible capability, deployable boundary, or risk isolation — never by layer (`01-database`, `02-api`) or by file.
+3. **Pick the number:** next unused `NN` in delivery order. Leave gaps rather than renumbering siblings mid-flight.
+4. **Create `spec/{epic}/NN-{child}/`** and run the normal "Starting a New Spec" flow inside it, sizing the child small/medium/large on its own merits.
+   - Set `**Epic:**` in the child's `progress.md` and link the parent from its `SPEC.md`.
+   - Do not restate the epic's shared constraints or vocabulary — comply and link.
+5. **Add the child's row** to the `## Children` table in `EPIC.md` with a one-line gist, and clear the corresponding patch from **Not Yet Split**.
+6. **Update the epic `progress.md`** — Active Child and Next Action.
+7. **Verify** the child directory and the updated parent files on disk.
+
 ### Creating a Plan
 
 1. **Read** `spec/{name}/SPEC.md` and `progress.md`.
@@ -170,29 +246,35 @@ Determine size from the user's description. Tell the user what size you picked a
 
 ### Implementing
 
-1. **Read all spec files** — SPEC.md, mockups.md, plan.md (if exists), progress.md.
+1. **Read all spec files** — SPEC.md, mockups.md, plan.md (if exists), progress.md. If this spec is a child, also read the parent's ELI10, Shared Constraints, Shared Vocabulary, and child index — but not sibling children.
 2. **Present summary:** "Here's where we are: {status}. Last completed: {step}. Next: {action}."
 3. **Work through steps.** If plan.md exists, follow its steps. Otherwise, work from SPEC.md acceptance criteria.
 4. **Keep mockups.md current** when implementation changes architecture, workflow shape, operator flow, or UI behavior.
 5. **Update progress.md after EVERY step** — Mark step complete, update Current Step and Next Action fields, add session log notes.
    - **SAVE CHECKPOINT:** Edit `spec/{name}/progress.md` after EACH completed step. This is the recovery mechanism.
-6. **When done,** set progress.md status to `done`.
+6. **When done,** set progress.md status to `done`. For a child, also refresh its row in the parent's `## Children` table and point the epic's Active Child at the next one.
 
 ### Checking Status
 
-**No args / general status:** Scan active `spec/*/progress.md` files. Do not include `spec-archive/*` unless the user asks for archived or historical specs. Show a table:
+**No args / general status:** Scan active `spec/*/progress.md` and `spec/*/*/progress.md` files. Do not include `spec-archive/*` unless the user asks for archived or historical specs. Show a table, with each epic's children indented under it in delivery order:
 
 | Spec | Status | Current Step | Next Action |
 |------|--------|--------------|-------------|
+| local-intelligence-platform *(epic)* | in-progress | — | continue `02-push-to-talk-dictation` |
+| ↳ 01-launch-surface | done | — | — |
+| ↳ 02-push-to-talk-dictation | planned | Step 3 of 7 | Wire the hotkey listener |
 
 **Specific spec:** Show full progress.md contents for that spec.
+
+**Specific epic:** Show the epic's `progress.md` header, its `## Children` table, and its **Not Yet Split** section — not every child's full progress.
 
 ## Progress Update Rules
 
 These apply during planning and implementation:
 
 - After completing each plan step → update progress.md (Current Step, Next Action, session log)
-- When making a decision → add to Decisions table with rationale and date
+- When making a decision → add to Decisions table with rationale and date. In an epic, a decision that binds more than one child goes in the parent's Decisions table; everything else stays child-local
+- When a child changes phase → refresh its row in the parent's `## Children` table and the epic's Active Child
 - When hitting a blocker → add to Blockers list
 - When encountering an error → add to Errors table with diagnosis
 - When architecture, workflow, or UI shape changes → update `mockups.md`
@@ -276,3 +358,9 @@ After `/clear` or context compression, follow this protocol:
 | Skip progress updates | Update after EVERY step |
 | Continue from memory after compaction | Re-read all spec files (Recovery Protocol) |
 | Auto-generate and dump a complete spec | Write collaboratively with the user |
+| Grow one SPEC.md until nobody reads it | Promote it to an epic and split the shippable slices out |
+| Restate child requirements in `EPIC.md` | Gist and link — detail lives in exactly one place |
+| Pre-create empty `NN-` folders for every idea | Leave unsharpened work in **Not Yet Split** |
+| Split children by layer (db / api / ui) | Split by shippable capability |
+| Give the epic parent a `plan.md` | Plan and build inside children |
+| Load every child spec to work on one | Load the active child plus the parent index |
