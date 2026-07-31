@@ -15,7 +15,7 @@ npx skills add stewartcelani/skills --list
 npx skills add stewartcelani/skills --skill spec
 
 # All skills in this repository
-npx skills add stewartcelani/skills --skill spec --skill spec-herdr-review --skill herdr --skill codex-session --skill claude-session --skill ship --skill gpmc
+npx skills add stewartcelani/skills --skill spec --skill spec-herdr-review --skill herdr --skill codex-session --skill claude-session --skill grok-session --skill ship --skill gpmc
 
 # Global install
 npx skills add -g stewartcelani/skills --skill spec
@@ -32,6 +32,7 @@ Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, GitHub Copilot, Cline
 | Terminal | [`herdr`](./skills/herdr/) | Drive Herdr workspaces, panes, and sibling coding agents from inside or outside a pane. |
 | Development | [`codex-session`](./skills/codex-session/) | Recover a local Codex task by GUID, title, phrase, or recent activity. |
 | Development | [`claude-session`](./skills/claude-session/) | Recover a local Claude Code conversation by GUID, title, phrase, or recent activity. |
+| Development | [`grok-session`](./skills/grok-session/) | Recover a local Grok CLI conversation by GUID, title, phrase, or recent activity. |
 | Development | [`ship`](./skills/ship/) | Intentionally commit and push every current Git-trackable change in one operation. |
 | Sysadmin | [`gpmc`](./skills/gpmc/) | Inventory Active Directory Group Policy safely, without RSAT. |
 
@@ -162,7 +163,21 @@ Use this for the same recovery flow with local Claude Code conversations. It wor
 
 It finds conversations by recency, session ID, title, or a phrase in the transcript; then it reports the working directory, branch, recent messages, tools, referenced artifacts, and current state. It does not yet read ordinary standalone Claude Desktop chat storage.
 
-When moving recovered work to a new Claude conversation or Codex, either session skill can create a compact, redacted recovery packet containing the goal, constraints, completed work, decisions, verification, blockers, and next action. The recipient should still inspect the repository and referenced artifacts.
+When moving recovered work to a new conversation in Claude, Codex, or Grok, any of the session skills can create a compact, redacted recovery packet containing the goal, constraints, completed work, decisions, verification, blockers, and next action. The recipient should still inspect the repository and referenced artifacts.
+
+### `grok-session` — recover local Grok CLI conversations
+
+Use this for the same recovery flow with local Grok CLI sessions under `~/.grok` (or `GROK_HOME`). It works on Windows, macOS, and Linux.
+
+```text
+/grok-session
+/grok-session latest
+/grok-session <GUID>
+/grok-session "Blah Blah"
+/grok-session "distinctive remembered phrase"
+```
+
+It finds sessions by recency, session ID, title, or a phrase in the transcript; then it reports the working directory, branch, model, context usage, recent messages, tools, plan/todos, and live PID if active. Resume in Grok with `grok --resume <GUID>` when appropriate. It does not read grok.com web chat history.
 
 ### `ship` — commit and push everything
 
@@ -249,6 +264,9 @@ skills/
   claude-session/
     SKILL.md
     scripts/
+  grok-session/
+    SKILL.md
+    scripts/
   ship/
     SKILL.md
   gpmc/
@@ -275,7 +293,7 @@ npx skills remove <skill>
 - `spec` writes under `spec/`; implementation outside that tree follows user approval.
 - `herdr` and `spec-herdr-review` start real CLIs in real terminals on your machine. Reviewer launch flags in `spec-herdr-review` may auto-approve tools or grant filesystem paths — read your alias map before trusting it, and note that reviewers are told never to edit product code.
 - `herdr` permits automated approval of *another* agent's permission prompts only under a narrow read-only whitelist, with exact matching and a loud bail-out on anything unrecognized. Writes, network sends, and unclassifiable commands are never auto-approved. If you do not want that at all, delete that paragraph from the installed skill.
-- `codex-session` and `claude-session` read local conversation records without modifying them and redact sensitive excerpts by default.
+- `codex-session`, `claude-session`, and `grok-session` read local conversation records without modifying them and redact sensitive excerpts by default.
 - `ship` deliberately stages and pushes every Git-trackable worktree change when explicitly invoked.
 
 ## License

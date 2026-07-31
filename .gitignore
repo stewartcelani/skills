@@ -6,6 +6,7 @@ Thumbs.db
 .idea/
 .vscode/
 *.code-workspace
+.obsidian/
 
 # Secrets / env
 .env
