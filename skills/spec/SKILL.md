@@ -94,7 +94,7 @@ Every `SPEC.md` MUST include an `## ELI10` section immediately after the title a
 When the user is reviewing quickly (or asks “just check the shape”), present and prioritize in this order:
 
 1. **`SPEC.md` → `## ELI10`** — the top bullets only
-2. **`mockups.md`** — diagrams / workflows / wireframes
+2. **`mockups.md`** — UI diagrams **and** system/process diagrams
 
 If those two are wrong, fix them before deep-diving `plan.md`, findings, or implementation. Do not bury alignment under long prose.
 

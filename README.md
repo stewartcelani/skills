@@ -15,7 +15,7 @@ npx skills add stewartcelani/skills --list
 npx skills add stewartcelani/skills --skill spec
 
 # All skills in this repository
-npx skills add stewartcelani/skills --skill spec --skill codex-session --skill claude-session --skill ship --skill gpmc
+npx skills add stewartcelani/skills --skill spec --skill spec-herdr-review --skill herdr --skill codex-session --skill claude-session --skill ship --skill gpmc
 
 # Global install
 npx skills add -g stewartcelani/skills --skill spec
@@ -28,6 +28,8 @@ Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, GitHub Copilot, Cline
 | Area | Skill | Use it when you need to… |
 |---|---|---|
 | Development | [`spec`](./skills/spec/) | Plan and persist non-trivial engineering work — from a one-file fix to a multi-slice epic — in durable feature files. |
+| Development | [`spec-herdr-review`](./skills/spec-herdr-review/) | Get a spec or an implemented diff reviewed by several agent CLIs at once, in visible terminal panes. |
+| Terminal | [`herdr`](./skills/herdr/) | Drive Herdr workspaces, panes, and sibling coding agents from inside or outside a pane. |
 | Development | [`codex-session`](./skills/codex-session/) | Recover a local Codex task by GUID, title, phrase, or recent activity. |
 | Development | [`claude-session`](./skills/claude-session/) | Recover a local Claude Code conversation by GUID, title, phrase, or recent activity. |
 | Development | [`ship`](./skills/ship/) | Intentionally commit and push every current Git-trackable change in one operation. |
@@ -93,6 +95,31 @@ where are we on the platform?                # epic status with children indente
 
 Pair it with a breadth-first interview (`/grill-me`) when charting the epic: settle the destination, the constraints every child inherits, the first shippable slice, and what is explicitly excluded. Depth comes later, inside each child. See [`skills/spec/references/epics.md`](./skills/spec/references/epics.md) for splitting heuristics, retrofitting an existing mega-spec, graduation, and archiving.
 
+### `spec-herdr-review` — multi-agent review in visible panes
+
+Use this after `/spec` when you want a second (and third, and fourth) pair of eyes. It runs several agent CLIs side by side in a [Herdr](#herdr--drive-terminal-panes-and-sibling-agents) workspace, each writing its verdict to a file under the spec.
+
+```text
+spec/<feature>/
+    ↓
+one request + response file per reviewer
+    ↓
+"<Project>: Reviews" workspace → one tab → one pane per reviewer
+    ↓
+each CLI runs interactively, you watch it happen
+    ↓
+REQUEST_FOR_REVIEW_RESPONSE_<REVIEWER>.md on disk
+```
+
+Two modes:
+
+- **Mode A — spec review.** Before code. Reviewers judge the design *and* open the files the spec cites to confirm its claims about the codebase are actually true.
+- **Mode B — implementation review.** After code. Reviewers read `git diff` against the spec and answer ship / ship-with-fixes / do-not-ship.
+
+Reviewers always run as real interactive CLIs, never headless — that is what makes Herdr's lifecycle states (`working`, `blocked`, `idle`, `done`) usable and what lets you watch the review as it happens. The workspace is always `{Project}: Reviews`, kept separate from `{Project}: Dev` and `{Project}: Servers`.
+
+The skill ships with a **reviewer alias map you edit**: what you say, the Herdr `--kind` of the CLI that actually runs, and the launch flags it needs. That matters because the names people use rarely match the binary — "GLM" may be the `copilot` CLI, "Composer" may be `grok`. Fill in the rows for the CLIs you have installed and delete the rest.
+
 ### `codex-session` — recover local Codex tasks
 
 Use this when a Codex task died, exhausted context, ran out of quota, crashed, or you simply want to see what you have been working on locally.
@@ -153,6 +180,30 @@ push current branch
 
 Mixed, broad, generated, staged, unstaged, untracked, or unrelated-looking changes are included without prompting. Git-ignored files remain ignored unless you explicitly name them. It does not open a pull request, rebase, force-push, or bypass failed hooks unless you explicitly ask.
 
+## Terminal
+
+### `herdr` — drive terminal panes and sibling agents
+
+[Herdr](https://herdr.dev) ([source](https://github.com/ogulcancelik/herdr)) is a terminal multiplexer built for coding agents: it organizes terminals into workspaces, tabs, and panes, recognizes the agent CLI running inside each pane, and exposes the whole session through a `herdr` CLI. This skill teaches an agent to use it correctly.
+
+```text
+herdr workspace / tab / pane      layout
+herdr pane run / read / wait      ordinary commands and servers
+herdr agent start / prompt / wait a recognized coding agent in a pane
+```
+
+What the skill actually prevents:
+
+- **Refusing to work from outside.** Control over SSH, from Claude Desktop, Cursor, or a plain shell is first-class. The skill stops agents from bailing out because `HERDR_ENV` is unset.
+- **Guessed IDs.** Workspace/tab/pane IDs are parsed out of Herdr's JSON responses, never inferred from sidebar order.
+- **Polling loops.** `agent start`, `agent prompt --wait`, and `pane wait-output` block on real state, so there is no sleep-and-retry code.
+- **Unreadable output.** It explains which read source to use, and what to do when an agent runs on the terminal's alternate screen and its rows never reach scrollback.
+- **Collateral damage.** Do not close workspaces, tabs, panes, or servers you did not create.
+
+It also carries a **"patterns that survive contact"** section for when an agent is actually driving other agents: completion means sentinel *and* artifact (never lifecycle state alone), every long wait gets a watchdog, approval-mode agents get babysat with narrow read-only whitelists, know which pane is you before you brief someone else, and treat a shared worktree as hostile — carve up files per lane, never `git checkout --`/`reset` your way out of a collision.
+
+Per-repository Herdr layouts (which dev server lives in which tab, required start order, ports) belong in a small companion skill — `herdr-<project>` — and the skill has a table you fill in to point at them.
+
 ## Sysadmin
 
 ### `gpmc` — read-only Active Directory Group Policy inventory
@@ -188,6 +239,10 @@ skills/
     SKILL.md
     references/     workflow.md, epics.md
     templates/      spec.md, epic.md, mockups.md, plan.md, progress.md, epic-progress.md, findings.md
+  spec-herdr-review/
+    SKILL.md
+  herdr/
+    SKILL.md
   codex-session/
     SKILL.md
     scripts/
@@ -218,6 +273,8 @@ npx skills remove <skill>
 - Treat skills like code and review `SKILL.md` plus any scripts before use in sensitive environments.
 - `gpmc` is intentionally read-only.
 - `spec` writes under `spec/`; implementation outside that tree follows user approval.
+- `herdr` and `spec-herdr-review` start real CLIs in real terminals on your machine. Reviewer launch flags in `spec-herdr-review` may auto-approve tools or grant filesystem paths — read your alias map before trusting it, and note that reviewers are told never to edit product code.
+- `herdr` permits automated approval of *another* agent's permission prompts only under a narrow read-only whitelist, with exact matching and a loud bail-out on anything unrecognized. Writes, network sends, and unclassifiable commands are never auto-approved. If you do not want that at all, delete that paragraph from the installed skill.
 - `codex-session` and `claude-session` read local conversation records without modifying them and redact sensitive excerpts by default.
 - `ship` deliberately stages and pushes every Git-trackable worktree change when explicitly invoked.
 

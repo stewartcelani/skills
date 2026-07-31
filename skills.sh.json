@@ -5,7 +5,12 @@
     {
       "title": "Development",
       "description": "Spec-driven workflows, handoffs, and engineering process skills",
-      "skills": ["spec", "codex-session", "claude-session", "ship"]
+      "skills": ["spec", "spec-herdr-review", "codex-session", "claude-session", "ship"]
+    },
+    {
+      "title": "Terminal orchestration",
+      "description": "Driving Herdr workspaces, panes, and sibling coding agents",
+      "skills": ["herdr"]
     },
     {
       "title": "Sysadmin",

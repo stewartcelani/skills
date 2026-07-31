@@ -67,7 +67,7 @@ Every `EPIC.md` requires one immediately after the title and before `## Destinat
 ## Rush review order
 
 1. `SPEC.md` → `## ELI10` bullets
-2. `mockups.md`
+2. `mockups.md` (UI **and** system/process diagrams)
 
 Only then deeper docs (`plan.md`, findings, full requirements).
 
