@@ -30,6 +30,7 @@ Works with Claude Code, Cursor, Codex, OpenCode, Windsurf, GitHub Copilot, Cline
 | Development | [`spec`](./skills/spec/) | Plan and persist non-trivial engineering work — from a one-file fix to a multi-slice epic — in durable feature files. |
 | Development | [`spec-herdr-review`](./skills/spec-herdr-review/) | Get a spec or an implemented diff reviewed by several agent CLIs at once, in visible terminal panes. |
 | Terminal | [`herdr`](./skills/herdr/) | Drive Herdr workspaces, panes, and sibling coding agents from inside or outside a pane. |
+| Messaging | [`whatsapp`](./skills/whatsapp/) | Send explicitly authorized WhatsApp text or media through a locally paired wacli linked device. |
 | Development | [`codex-session`](./skills/codex-session/) | Recover a local Codex task by GUID, title, phrase, or recent activity. |
 | Development | [`claude-session`](./skills/claude-session/) | Recover a local Claude Code conversation by GUID, title, phrase, or recent activity. |
 | Development | [`ship`](./skills/ship/) | Intentionally commit and push every current Git-trackable change in one operation. |

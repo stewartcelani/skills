@@ -13,6 +13,11 @@
       "skills": ["herdr"]
     },
     {
+      "title": "Messaging",
+      "description": "Explicit WhatsApp sends through a locally paired linked device",
+      "skills": ["whatsapp"]
+    },
+    {
       "title": "Sysadmin",
       "description": "Windows, Active Directory, and operational admin tooling",
       "skills": ["gpmc"]
