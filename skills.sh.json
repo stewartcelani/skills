@@ -5,7 +5,7 @@
     {
       "title": "Development",
       "description": "Spec-driven workflows, handoffs, and engineering process skills",
-      "skills": ["spec", "spec-herdr-review", "codex-session", "claude-session", "ship"]
+      "skills": ["spec", "spec-herdr-review", "codex-session", "claude-session", "grok-session", "ship"]
     },
     {
       "title": "Terminal orchestration",
